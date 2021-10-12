@@ -164,9 +164,8 @@ export class Quadtree<T extends Rect> {
     this._tempSet.clear();
 
     this.objects.forEach(value => {
-      if (rectOverlaps(pRect, value) && !this._tempSet.has(value)) {
+      if (rectOverlaps(pRect, value)) {
         this._tempSet.add(value);
-        cb(value)
       }
     });
 
@@ -174,14 +173,14 @@ export class Quadtree<T extends Rect> {
     if (this.nodes.length > 0) {
       this.getIndex(pRect, index => {
         this.nodes[index].retrieve(pRect, value => {
-          if (rectOverlaps(pRect, value) && !this._tempSet.has(value)) {
+          if (rectOverlaps(pRect, value)) {
             this._tempSet.add(value);
-            cb(value)
           }
         });
       });
     }
 
+    this._tempSet.forEach(value => cb(value));
     this._tempSet.clear();
   }
 
