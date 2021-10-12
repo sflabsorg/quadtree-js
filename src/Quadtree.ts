@@ -5,12 +5,21 @@ export interface Rect {
   y1: number;
 }
 
-export function rectOverlaps(rect1: Rect, rect2: Rect): boolean {
+export function rectsOverlap(rect1: Rect, rect2: Rect): boolean {
   return !(
     rect1.x0 >= rect2.x1 ||
     rect1.x1 <= rect2.x0 ||
     rect1.y0 >= rect2.y1 ||
     rect1.y1 <= rect2.y0
+  );
+}
+
+export function rectsEqual(rect1: Rect, rect2: Rect): boolean {
+  return (
+    rect1.x0 === rect2.x0 &&
+    rect1.x1 === rect2.x1 &&
+    rect1.y0 === rect2.y0 &&
+    rect1.y1 === rect2.y1
   );
 }
 
@@ -164,7 +173,7 @@ export class Quadtree<T extends Rect> {
     this._tempSet.clear();
 
     this.objects.forEach(value => {
-      if (rectOverlaps(pRect, value)) {
+      if (rectsOverlap(pRect, value)) {
         this._tempSet.add(value);
       }
     });
@@ -173,7 +182,7 @@ export class Quadtree<T extends Rect> {
     if (this.nodes.length > 0) {
       this.getIndex(pRect, index => {
         this.nodes[index].retrieve(pRect, value => {
-          if (rectOverlaps(pRect, value)) {
+          if (rectsOverlap(pRect, value)) {
             this._tempSet.add(value);
           }
         });
