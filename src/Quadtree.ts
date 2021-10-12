@@ -20,7 +20,7 @@ export class Quadtree<T extends Rect> {
   private nodes: Quadtree<T>[] = [];
 
   constructor(
-    private bounds: Rect,
+    public bounds: Rect,
     private maxObjects: number = 10,
     private maxLevels: number = 8,
     private level: number = 0
