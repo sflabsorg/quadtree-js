@@ -184,7 +184,7 @@ export class Quadtree<T extends Rect> {
     this._tempSet.clear();
   }
 
-  clear() {
+  clear(keepNodes: boolean = true) {
     this.objects.clear();
 
     for (let i = 0; i < this.nodes.length; i++) {
@@ -193,6 +193,8 @@ export class Quadtree<T extends Rect> {
       }
     }
 
-    this.nodes = [];
+    if (!keepNodes) {
+      this.nodes = [];
+    }
   }
 }
