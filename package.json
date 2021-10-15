@@ -1,6 +1,6 @@
 {
-  "name": "quadtree-sflabs",
-  "version": "1.0.5",
+  "name": "@sflabs/quadtree",
+  "version": "1.0.6",
   "main": "dist/index.js",
   "license": "MIT",
   "author": "Eugene Avsievich <avsievich@sflabs.org>",
@@ -9,6 +9,6 @@
   ],
   "scripts": {
     "build": "rm -fr dist && tsc --declaration",
-    "release": "yarn build && yarn publish"
+    "release": "yarn build && yarn publish --access=public"
   }
 }
