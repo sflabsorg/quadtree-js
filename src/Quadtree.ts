@@ -24,7 +24,7 @@ export function rectsEqual(rect1: Rect, rect2: Rect): boolean {
 }
 
 export class Quadtree<T extends Rect> {
-  private readonly _tempSet = new Set<T>();
+  private readonly retrieveSet = new Set<T>();
   private readonly objects = new Set<T>();
   private nodes: Quadtree<T>[] = [];
 
@@ -76,7 +76,7 @@ export class Quadtree<T extends Rect> {
     }, this.maxObjects, this.maxLevels, nextLevel);
   }
 
-  private getIndex(pRect: Rect, cb: (index: number) => any) {
+  private getIndex(rect: Rect, cb: (index: number) => any) {
     if (this.nodes.length === 0) {
       return;
     }
@@ -84,10 +84,10 @@ export class Quadtree<T extends Rect> {
     let verticalMidpoint = this.bounds.x0 + ((this.bounds.x1 - this.bounds.x0) / 2);
     let horizontalMidpoint = this.bounds.y0 + ((this.bounds.y1 - this.bounds.y0) / 2);
 
-    let startIsNorth = pRect.y0 < horizontalMidpoint;
-    let startIsWest = pRect.x0 < verticalMidpoint;
-    let endIsEast = pRect.x1 > verticalMidpoint;
-    let endIsSouth = pRect.y1 > horizontalMidpoint;
+    let startIsNorth = rect.y0 < horizontalMidpoint;
+    let startIsWest = rect.x0 < verticalMidpoint;
+    let endIsEast = rect.x1 > verticalMidpoint;
+    let endIsSouth = rect.y1 > horizontalMidpoint;
 
     // Top-right quad.
     if (startIsNorth && endIsEast) {
@@ -110,32 +110,32 @@ export class Quadtree<T extends Rect> {
     }
   }
 
-  private getObjectNodes(pRect: T, cb: (tree: Quadtree<T>) => any) {
+  private getObjectNodes(rect: T, cb: (tree: Quadtree<T>) => any) {
     // If there are no subnodes, object must be here.
     if (this.nodes.length < 1) {
-      if (this.objects.has(pRect)) {
+      if (this.objects.has(rect)) {
         cb(this);
       }
     } else {
-      this.getIndex(pRect, index => {
-        this.nodes[index].getObjectNodes(pRect, tree => {
+      this.getIndex(rect, index => {
+        this.nodes[index].getObjectNodes(rect, tree => {
           cb(tree);
         });
       });
     }
   }
 
-  insert(pRect: T) {
+  insert(rect: T) {
     // If we have subnodes, call insert on matching subnodes.
     if (this.nodes.length > 0) {
-      this.getIndex(pRect, index => {
-        this.nodes[index].insert(pRect);
+      this.getIndex(rect, index => {
+        this.nodes[index].insert(rect);
       });
       return;
     }
 
-    // Otherwise, store object here.
-    this.objects.add(pRect);
+    // Otherwise, store rect here.
+    this.objects.add(rect);
 
     // maxObjects reached.
     if (this.objects.size > this.maxObjects && this.level < this.maxLevels) {
@@ -157,40 +157,40 @@ export class Quadtree<T extends Rect> {
     }
   }
 
-  remove(pRect: T): boolean {
+  remove(rect: T): boolean {
     let removed = false;
-    if (this.objects.has(pRect)) {
-      this.objects.delete(pRect);
+    if (this.objects.has(rect)) {
+      this.objects.delete(rect);
       removed = true;
     }
-    this.getObjectNodes(pRect, tree => {
-      removed = tree.remove(pRect) || removed;
+    this.getObjectNodes(rect, tree => {
+      removed = tree.remove(rect) || removed;
     });
     return removed;
   }
 
-  retrieve(pRect: Rect, cb: (rect: T) => any) {
-    this._tempSet.clear();
+  retrieve(rect: Rect, cb: (rect: T) => any) {
+    this.retrieveSet.clear();
 
     this.objects.forEach(value => {
-      if (rectsOverlap(pRect, value)) {
-        this._tempSet.add(value);
+      if (rectsOverlap(rect, value)) {
+        this.retrieveSet.add(value);
       }
     });
 
     // If we have subnodes, retrieve their objects.
     if (this.nodes.length > 0) {
-      this.getIndex(pRect, index => {
-        this.nodes[index].retrieve(pRect, value => {
-          if (rectsOverlap(pRect, value)) {
-            this._tempSet.add(value);
+      this.getIndex(rect, index => {
+        this.nodes[index].retrieve(rect, value => {
+          if (rectsOverlap(rect, value)) {
+            this.retrieveSet.add(value);
           }
         });
       });
     }
 
-    this._tempSet.forEach(value => cb(value));
-    this._tempSet.clear();
+    this.retrieveSet.forEach(value => cb(value));
+    this.retrieveSet.clear();
   }
 
   clear(keepNodes: boolean = true) {
